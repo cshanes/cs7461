@@ -27,8 +27,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 # tuned_parameters = [{'n_estimators': range(20,200), 'learning_rate': np.arange(0.1, 2.5, 0.1)}]
 
 classifiers = [
-    KNeighborsClassifier(3),
-    SVC(gamma=2, C=1),
+    # KNeighborsClassifier(3),
+    # SVC(gamma=2, C=1),
     DecisionTreeClassifier(max_depth=10),
     MLPClassifier(hidden_layer_sizes=(100, 20))]
 
@@ -38,17 +38,19 @@ for i in range(1, 200):
         mlp_layer_sizes.append((i, j))
 
 tuned_parameters = [
-    {'n_neighbors': range(1,20)},
-    {'gamma': np.arange(0.1, 5.0, 0.1), 'C': np.arange(0.1, 5.0, 0.1)},
+    # {'n_neighbors': range(1,20)},
+    # {'gamma': np.arange(0.1, 5.0, 0.1), 'C': np.arange(0.1, 5.0, 0.1)},
     {'max_depth': range(0, 100)},
     {'hidden_layer_sizes': mlp_layer_sizes, 'alpha': np.arange(0, 1, 0.01), }
 ]
 
-for clf in classifiers:
+for i in range(len(classifiers)):
     print("# Tuning hyper-parameters for roc_auc")
     print()
+    clf = classifiers[i]
+    params = tuned_parameters[i]
 
-    clf = GridSearchCV(AdaBoostClassifier(), tuned_parameters, cv=10, scoring='roc_auc')
+    clf = GridSearchCV(clf, params, cv=10, scoring='roc_auc')
     clf.fit(X_train, y_train)
 
     print("Best parameters set found on development set:")
