@@ -6,6 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 
 
@@ -20,16 +24,31 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.5, random_state=0)
 
 # Set the parameters by cross-validation
-tuned_parameters = [{'n_estimators': range(20,200), 'learning_rate': np.arange(0.1, 2.5, 0.1)}]
+# tuned_parameters = [{'n_estimators': range(20,200), 'learning_rate': np.arange(0.1, 2.5, 0.1)}]
 
-scores = ['accuracy', 'roc_auc']
+classifiers = [
+    KNeighborsClassifier(3),
+    SVC(gamma=2, C=1),
+    DecisionTreeClassifier(max_depth=10),
+    MLPClassifier(hidden_layer_sizes=(100, 20))]
 
-for score in scores:
-    print("# Tuning hyper-parameters for %s" % score)
+mlp_layer_sizes = []
+for i in range(1, 200):
+    for j in range(1, 50):
+        mlp_layer_sizes.append((i, j))
+
+tuned_parameters = [
+    {'n_neighbors': range(1,20)},
+    {'gamma': np.arange(0.1, 5.0, 0.1), 'C': np.arange(0.1, 5.0, 0.1)},
+    {'max_depth': range(0, 100)},
+    {'hidden_layer_sizes': mlp_layer_sizes, 'alpha': np.arange(0, 1, 0.01), }
+]
+
+for clf in classifiers:
+    print("# Tuning hyper-parameters for roc_auc")
     print()
 
-    clf = GridSearchCV(AdaBoostClassifier(), tuned_parameters, cv=5,
-                       scoring='%s' % score)
+    clf = GridSearchCV(AdaBoostClassifier(), tuned_parameters, cv=10, scoring='roc_auc')
     clf.fit(X_train, y_train)
 
     print("Best parameters set found on development set:")
