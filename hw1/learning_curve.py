@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.model_selection import learning_curve
@@ -11,19 +12,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
-
-
-def create_two_spirals():
-    spiral_data = pd.read_csv('twoSpirals.csv')
-    return spiral_data.drop('class', axis=1).values, spiral_data.loc[:, 'class'].values
-
-
-def get_hill_valley_data():
-    data = pd.read_csv('https://raw.githubusercontent.com/rhiever/Data-Analysis-and-Machine-Learning-Projects/master'
-                       '/tpot-demo/Hill_Valley_without_noise.csv.gz', sep='\t', compression='gzip')
-    X = data.drop('class', axis=1).values
-    y = data.loc[:, 'class'].values
-    return X, y
+from hw1_util import create_two_spirals, get_hill_valley_data
 
 
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
@@ -88,9 +77,9 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
                      test_scores_mean + test_scores_std, alpha=0.1, color="g")
     plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-             label="Training score")
+             label="Training Score")
     plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-             label="Cross-validation score")
+             label="Cross-validation Score")
 
     plt.legend(loc="best")
     return plt
@@ -105,34 +94,30 @@ X, y = get_hill_valley_data()
 # estimator = SVC(gamma=0.001)
 # plot_learning_curve(estimator, title, X, y, (0.5, 1.01), cv=cv, n_jobs=4)
 
-title = "Learning Curves (Decision Tree)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = DecisionTreeClassifier(max_depth=5)
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
+# title = "Learning Curves (Decision Tree)"
+cv = 10
+# estimator = DecisionTreeClassifier(max_depth=5)
+# plot_learning_curve(estimator, title, X, y, (0.8, 1.01), cv=cv, n_jobs=4)
 
-title = "Learning Curves (MPLClassifier)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = MLPClassifier(hidden_layer_sizes=(100, 20))
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
-
+# title = "Learning Curves (MPLClassifier)"
+# estimator = MLPClassifier(hidden_layer_sizes=(100, 20))
+# plot_learning_curve(estimator, title, X, y, (0.6, 1.01), cv=cv, n_jobs=4)
+#
 title = "Learning Curves (AdaBoost)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = AdaBoostClassifier()
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
+estimator = AdaBoostClassifier(base_estimator=LogisticRegression())
+plot_learning_curve(estimator, title, X, y, (0.8, 1.01), cv=cv, n_jobs=4)
+#
+# title = "Learning Curves (SVM Linear Kernel)"
+# estimator = SVC(kernel="linear", C=0.025)
+# plot_learning_curve(estimator, title, X, y, (0.8, 1.01), cv=cv, n_jobs=4)
 
-title = "Learning Curves (SVM Linear Kernel)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = SVC(kernel="linear", C=0.025)
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
+# title = "Learning Curves (SVM RBF Kernel)"
+# cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+# estimator = SVC()
+# plot_learning_curve(estimator, title, X, y, (0.9, 1.01), cv=cv, n_jobs=1)
 
-title = "Learning Curves (SVM RBF Kernel)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = SVC(gamma=2, C=1)
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
-
-title = "Learning Curves (k-Nearest Neighbors)"
-cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
-estimator = KNeighborsClassifier(3)
-plot_learning_curve(estimator, title, X, y, (0.2, 1.01), cv=cv, n_jobs=4)
+# title = "Learning Curves (k-Nearest Neighbors)"
+# estimator = KNeighborsClassifier(3)
+# plot_learning_curve(estimator, title, X, y, (0.8, 1.01), cv=cv, n_jobs=4)
 
 plt.show()

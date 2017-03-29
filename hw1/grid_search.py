@@ -11,26 +11,23 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from hw1_util import create_two_spirals, get_hill_valley_data
 
-
-def create_two_spirals():
-    spiral_data = pd.read_csv('twoSpirals.csv')
-    return spiral_data.drop('class', axis=1).values, spiral_data.loc[:, 'class'].values
 
 X, y = create_two_spirals()
 
 # Split the dataset in two equal parts
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.5, random_state=0)
+    X, y, test_size=0.2, random_state=0)
 
 # Set the parameters by cross-validation
 # tuned_parameters = [{'n_estimators': range(20,200), 'learning_rate': np.arange(0.1, 2.5, 0.1)}]
 
 classifiers = [
     # KNeighborsClassifier(3),
-    # SVC(gamma=2, C=1),
-    DecisionTreeClassifier(max_depth=10),
-    MLPClassifier(hidden_layer_sizes=(100, 20))]
+    SVC(C=1)]
+    # DecisionTreeClassifier(max_depth=10),
+    # MLPClassifier(hidden_layer_sizes=(100, 20))]
 
 mlp_layer_sizes = []
 for i in range(1, 200):
@@ -39,9 +36,9 @@ for i in range(1, 200):
 
 tuned_parameters = [
     # {'n_neighbors': range(1,20)},
-    # {'gamma': np.arange(0.1, 5.0, 0.1), 'C': np.arange(0.1, 5.0, 0.1)},
-    {'max_depth': range(0, 100)},
-    {'hidden_layer_sizes': mlp_layer_sizes, 'alpha': np.arange(0, 1, 0.01), }
+    {'gamma': np.arange(0, 5, 0.1), 'C': [1]},
+    # {'max_depth': range(0, 100)},
+    # {'hidden_layer_sizes': mlp_layer_sizes, 'alpha': np.arange(0, 1, 0.01), }
 ]
 
 for i in range(len(classifiers)):
@@ -73,4 +70,7 @@ for i in range(len(classifiers)):
     print()
     y_true, y_pred = y_test, clf.predict(X_test)
     print(classification_report(y_true, y_pred))
+
+    clf.fit(X_test, y_test)
+    print(clf.best_params_)
     print()

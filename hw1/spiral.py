@@ -13,29 +13,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score
 from sklearn.cross_validation import cross_val_score
-
-
-def create_two_spirals():
-    spiral_data = pd.read_csv('twoSpirals.csv')
-    return spiral_data.drop('class', axis=1).values, spiral_data.loc[:, 'class'].values
-
-
-create_two_spirals()
+from hw1_util import create_two_spirals, get_hill_valley_data, get_all_classifiers
+import time
 
 h = .02  # step size in the mesh
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM",
          "Decision Tree", "Neural Net", "AdaBoost"]
 
-classifiers = [
-    KNeighborsClassifier(3),
-    SVC(kernel="linear", C=0.025),
-    SVC(gamma=2, C=1),
-    DecisionTreeClassifier(max_depth=10),
-    MLPClassifier(hidden_layer_sizes=(100, 20)),
-    AdaBoostClassifier(n_estimators=192, learning_rate=0.90000000000000002)]
+classifiers = get_all_classifiers()
 
 X, y = make_classification(n_features=2, n_redundant=0, n_informative=2,
                            random_state=1, n_clusters_per_class=1)
@@ -56,7 +44,7 @@ for ds_cnt, ds in enumerate(datasets):
     X, y = ds
     X = StandardScaler().fit_transform(X)
     X_train, X_test, y_train, y_test = \
-        train_test_split(X, y, test_size=.4, random_state=42)
+        train_test_split(X, y, test_size=.2, random_state=0)
 
     x_min, x_max = X[:, 0].min() - .5, X[:, 0].max() + .5
     y_min, y_max = X[:, 1].min() - .5, X[:, 1].max() + .5
@@ -81,10 +69,16 @@ for ds_cnt, ds in enumerate(datasets):
 
     # iterate over classifiers
     for name, clf in zip(names, classifiers):
+
+        start_time = time.perf_counter()
         ax = plt.subplot(len(datasets), len(classifiers) + 1, i)
         clf.fit(X_train, y_train)
+        end_time = time.perf_counter()
+        if name == 'Neural Net':
+            print('Fit time: ' + str(end_time - start_time))
+
         y_pred = clf.predict(X_test)
-        score = roc_auc_score(y_test, y_pred)
+        score = accuracy_score(y_test, y_pred)
 
         # Plot the decision boundary. For that, we will assign a color to each
         # point in the mesh [x_min, x_max]x[y_min, y_max].
